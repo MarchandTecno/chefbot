@@ -1,10 +1,20 @@
 # app.py (flujo simple)
 from flask import Flask, request, jsonify
+from flask import jsonify
 from models.user_model import User
 from models.order_model import Order
 from models.menu_item_model import MenuItem
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
 
 app = Flask(__name__)
+
+# Configurar la base de datos
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+
+db = SQLAlchemy(app)
 
 # Datos simulados para pruebas
 menu = [
@@ -70,6 +80,13 @@ def confirm_order():
     user.clear_order()
     return jsonify({"message": f"Pedido confirmado. Total: ${total}. ¡Gracias por tu compra!"})
 
+@app.route("/ping_db", methods=["GET"])
+def ping_db():
+    try:
+        db.session.execute(text("SELECT 1"))
+        return jsonify({"message": "Conexión a la base de datos exitosa"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
