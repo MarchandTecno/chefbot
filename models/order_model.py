@@ -1,18 +1,13 @@
-# models/order_model.py
-class Order:
-    def __init__(self, user_id):
-        self.user_id = user_id
-        self.items = []
-        self.status = "pending"
+from db_init import db
 
-    def add_item(self, item, quantity=1):
-        self.items.append({
-            "item": item,
-            "quantity": quantity
-        })
+class Order(db.Model):
+    __tablename__ = 'orders'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    employee_id = db.Column(db.Integer, nullable=True)
+    total = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
-    def get_total(self):
-        return sum(item['item'].price * item['quantity'] for item in self.items)
+    items = db.relationship('OrderItem', backref='order', lazy=True)
 
-    def complete_order(self):
-        self.status = "completed"
