@@ -1,10 +1,14 @@
-# models/user_model.py
-class User:
-    def __init__(self, user_id, name, phone_number):
-        self.user_id = user_id
-        self.name = name
-        self.phone_number = phone_number
-        self.current_order = None
+from flask_sqlalchemy import SQLAlchemy
+from db_init import db
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    phone = db.Column(db.String(20), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())  
+    current_order = db.Column(db.JSON, nullable=True)
 
     def start_order(self):
         self.current_order = []
@@ -15,3 +19,11 @@ class User:
 
     def clear_order(self):
         self.current_order = None
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "phone_number": self.phone_number,
+            "current_order": self.current_order,
+        }
